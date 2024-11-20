@@ -27,7 +27,7 @@ pipeline {
             steps {
                 script {
                     dir('oss-service') {
-                        sh "docker build -t ${IMAGE_NAME} -f ../Dockerfile ."
+                        sh "docker build -t ${IMAGE_NAME} -f ../../Dockerfile ."
                     }
                 }
             }
