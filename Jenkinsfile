@@ -5,6 +5,8 @@ pipeline {
         REPO_URL = "http://${env.MAVEN_URL}/repository/maven-snapshots/"
         REPO_ID = "snapshots"
         PROJECT_NAME = "${env.JOB_NAME}"
+        DIR_API = "${env.DIR_KEY}-api"
+        DIR_SERVICE = "${env.DIR_KEY}-service"
         IMAGE_NAME = "${env.REGISTRY_URL}/${PROJECT_NAME}:${env.BUILD_NUMBER}"
     }
 
@@ -16,8 +18,9 @@ pipeline {
         stage('构建并发布') {
             steps {
                 script {
+                    sh "echo '1:${DIR_API},2:${DIR_SERVICE}'"
                     sh "mvn clean deploy -DaltDeploymentRepository=${REPO_ID}::default::${REPO_URL}"
-                    dir('oss-api') {
+                    dir(DIR_API) {
                         sh "mvn clean deploy -DaltDeploymentRepository=${REPO_ID}::default::${REPO_URL}"
                     }
                 }
@@ -26,9 +29,7 @@ pipeline {
         stage('构建镜像') {
             steps {
                 script {
-                    dir('oss-service') {
-                        sh "docker build -t ${IMAGE_NAME} -f ../../Dockerfile ."
-                    }
+                    sh "docker build -t ${IMAGE_NAME} -f ../Dockerfile ./${DIR_SERVICE}/"
                 }
             }
         }
@@ -39,8 +40,14 @@ pipeline {
         }
         stage('运行镜像') {
             steps {
-                sh "docker stop ${PROJECT_NAME}"
-                sh "docker rm ${PROJECT_NAME}"
+                sh '''
+                    if [ -n \"\$(docker ps -q -f name=${PROJECT_NAME})" ]; then
+                        docker stop ${PROJECT_NAME}
+                    fi
+                    if [ -n \"\$(docker ps -aq -f name=${PROJECT_NAME})" ]; then
+                        docker rm ${PROJECT_NAME}
+                    fi
+                '''
                 sh "docker pull ${IMAGE_NAME}"
                 sh "docker run -d --name ${PROJECT_NAME} ${IMAGE_NAME}"
                 sh "sleep 10"
