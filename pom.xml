@@ -10,19 +10,10 @@
         <module>oss-service</module>
     </modules>
 
-    <parent>
-        <groupId>net.hwyz.iov.cloud.tsp</groupId>
-        <artifactId>service-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
-
+    <groupId>net.hwyz.iov.cloud.tsp</groupId>
     <artifactId>oss</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <description>对象存储服务</description>
     <name>oss</name>
-
-    <properties>
-        <oss.version>0.0.1-SNAPSHOT</oss.version>
-    </properties>
 
 </project>
